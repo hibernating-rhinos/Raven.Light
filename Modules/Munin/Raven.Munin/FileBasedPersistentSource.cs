@@ -12,31 +12,34 @@ namespace Raven.Munin
     {
         private readonly string basePath;
         private readonly string logPath;
-        private readonly string prefix;
 
         private FileStream log;
 
         public FileBasedPersistentSource(string basePath, string prefix)
         {
             this.basePath = basePath;
-            this.prefix = prefix;
             logPath = Path.Combine(basePath, prefix + ".ravendb");
 
             RecoverFromFailedRename(logPath);
 
-            CreatedNew = File.Exists(logPath) == false;
+            CreatedNew = FileExists(logPath) == false;
 
-            OpenFiles();
+            log = OpenFiles(logPath);
         }
 
-        protected override Stream Log
+    	protected virtual bool FileExists(string path)
+    	{
+    		return File.Exists(path);
+    	}
+
+    	protected override Stream Log
         {
             get { return log; }
         }
 
-        private void OpenFiles()
+        protected virtual FileStream OpenFiles(string path)
         {
-            log = new FileStream(logPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096);
+            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096);
         }
 
         protected override Stream CreateClonedStreamForReadOnlyPurposes()
@@ -57,19 +60,19 @@ namespace Raven.Munin
 
             string renamedLogFile = logPath + ".rename_op";
 
-            File.Move(logPath, renamedLogFile);
+            FileMove(logPath, renamedLogFile);
 
-            File.Move(logTempName, logPath);
+            FileMove(logTempName, logPath);
 
-            File.Delete(renamedLogFile);
+            FileDelete(renamedLogFile);
 
-            OpenFiles();
+            log = OpenFiles(logPath);
         }
 
         public override Stream CreateTemporaryStream()
         {
             string tempFile = Path.Combine(basePath, Path.GetFileName(Path.GetTempFileName()));
-            return File.Open(tempFile, FileMode.Create, FileAccess.ReadWrite);
+            return OpenFiles(tempFile);
         }
 
         public override void FlushLog()
@@ -77,24 +80,34 @@ namespace Raven.Munin
         	log.Flush(true);
         }
 
-        private static void RecoverFromFailedRename(string file)
+        private void RecoverFromFailedRename(string file)
         {
             string renamedFile = file + ".rename_op";
-            if (File.Exists(renamedFile) == false) // not in the middle of rename op, we are good
+            if (FileExists(renamedFile) == false) // not in the middle of rename op, we are good
                 return;
 
-            if (File.Exists(file))
+            if (FileExists(file))
                 // we successfully renamed the new file and crashed before we could remove the old copy
             {
                 //just complete the op and we are good (committed)
-                File.Delete(renamedFile);
+                FileDelete(renamedFile);
             }
             else // we successfully renamed the old file and crashed before we could remove the new file
             {
                 // just undo the op and we are good (rollback)
-                File.Move(renamedFile, file);
+                FileMove(renamedFile, file);
             }
         }
+
+    	protected virtual void FileMove(string src, string dst)
+    	{
+    		File.Move(src, dst);
+    	}
+
+    	protected virtual void FileDelete(string path)
+    	{
+    		File.Delete(path);
+    	}
 
     	public override void EnsureCapacity(int value)
     	{
@@ -113,7 +126,7 @@ namespace Raven.Munin
 
         public void Delete()
         {
-            File.Delete(logPath);
+            FileDelete(logPath);
         }
     }
 }
