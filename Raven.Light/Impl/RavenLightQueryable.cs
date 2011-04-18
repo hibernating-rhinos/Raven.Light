@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Raven.Light.Persistence;
 using System.Linq;
 
 namespace Raven.Light.Impl
@@ -20,19 +19,33 @@ namespace Raven.Light.Impl
 			this.documents = documents;
 		}
 
-		public IEnumerable<IGrouping<TKey, T>> GroupBy<TKey>(Func<T, TKey> keySelector)
+		public IEnumerable<TResult> Join<TInner, TKey, TResult>(RavenLightQueryable<TInner> inner,
+		                                                                       Func<T, TKey> outerKeySelector,
+		                                                                       Func<TInner, TKey> innerKeySelector,
+		                                                                       Func<T, TInner, TResult> resultSelector)
 		{
-			return documents.Select(x=>x.GetEntityButDontAttachToSession()).GroupBy(keySelector);
+			return documents.Join(inner.documents, doc => outerKeySelector(doc.GetEntityButDontAttachToSession()),
+			                      doc => innerKeySelector(doc.GetEntityButDontAttachToSession()),
+			                      (doc1, doc2) =>
+									  resultSelector(doc1.AddToSessionAndReturnWiredInstance(),
+													 doc2.AddToSessionAndReturnWiredInstance()));
 		}
 
-		public RavenLightQueryable<T> OrderBy<TKey>(Func<T,TKey> keySelector)
+
+		public IEnumerable<IGrouping<TKey, T>> GroupBy<TKey>(Func<T, TKey> keySelector)
+		{
+			return documents.Select(x => x.GetEntityButDontAttachToSession()).GroupBy(keySelector);
+		}
+
+		public RavenLightQueryable<T> OrderBy<TKey>(Func<T, TKey> keySelector)
 		{
 			return new RavenLightQueryable<T>(documents.OrderBy(doc => keySelector(doc.GetEntityButDontAttachToSession())));
 		}
 
 		public RavenLightQueryable<T> OrderByDescending<TKey>(Func<T, TKey> keySelector)
 		{
-			return new RavenLightQueryable<T>(documents.OrderByDescending(doc => keySelector(doc.GetEntityButDontAttachToSession())));
+			return
+				new RavenLightQueryable<T>(documents.OrderByDescending(doc => keySelector(doc.GetEntityButDontAttachToSession())));
 		}
 
 
@@ -58,48 +71,49 @@ namespace Raven.Light.Impl
 
 		public T First()
 		{
-			var tuple = documents.First();
+			DocumentBeforeEnteringSession<T> tuple = documents.First();
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
 
 		public T First(Func<T, bool> predicate)
 		{
-			var tuple = documents.First(Filter(predicate));
+			DocumentBeforeEnteringSession<T> tuple = documents.First(Filter(predicate));
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
 
 		public T Single()
 		{
-			var tuple = documents.Single();
+			DocumentBeforeEnteringSession<T> tuple = documents.Single();
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
 
 		public T Single(Func<T, bool> predicate)
 		{
-			var tuple = documents.Single(Filter(predicate));
+			DocumentBeforeEnteringSession<T> tuple = documents.Single(Filter(predicate));
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
+
 		public T FirstOrDefault()
 		{
-			var tuple = documents.FirstOrDefault();
+			DocumentBeforeEnteringSession<T> tuple = documents.FirstOrDefault();
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
 
 		public T FirstOrDefault(Func<T, bool> predicate)
 		{
-			var tuple = documents.FirstOrDefault(Filter(predicate));
+			DocumentBeforeEnteringSession<T> tuple = documents.FirstOrDefault(Filter(predicate));
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
 
 		public T SingleOrDefault()
 		{
-			var tuple = documents.SingleOrDefault();
+			DocumentBeforeEnteringSession<T> tuple = documents.SingleOrDefault();
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
 
 		public T SingleOrDefault(Func<T, bool> predicate)
 		{
-			var tuple = documents.SingleOrDefault(Filter(predicate));
+			DocumentBeforeEnteringSession<T> tuple = documents.SingleOrDefault(Filter(predicate));
 			return tuple.AddToSessionAndReturnWiredInstance();
 		}
 	}

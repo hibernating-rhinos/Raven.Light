@@ -1,4 +1,5 @@
 ﻿using System.IO.IsolatedStorage;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Raven.Light.Impl;
 
@@ -89,6 +90,45 @@ namespace SilverlightTest1
 					Assert.AreEqual(1, users.ToList().Count);
 					Assert.IsFalse(session.Advanced.IsLoaded(rahineId));
 					Assert.IsTrue(session.Advanced.IsLoaded(ayendeId));
+				}
+			}
+		}
+
+
+		[TestMethod]
+		public void CanQueryWithJoin()
+		{
+			string ayendeId, rahineId;
+			using (var store = new EmbeddedDocumentStore())
+			{
+				using (var session = store.OpenSession())
+				{
+					var ayende = new User
+					{
+						Name = "ayende"
+					};
+					session.Store(ayende);
+					ayendeId = session.Advanced.GetDocumentId(ayende);
+					var rahien = new User
+					{
+						ParentId = ayendeId,
+						Name = "rahien"
+					};
+					session.Store(rahien);
+					rahineId = session.Advanced.GetDocumentId(rahien);
+					session.SaveChanges();
+				}
+
+				using (var session = store.OpenSession())
+				{
+					var users = from user in session.Query<User>()
+					            join child in session.Query<User>() on user.Id equals child.ParentId
+					            where user.Name == "ayende"
+					            select new {ParentName = user.Name, ChildName = child.Name};
+
+					var actual = users.First();
+					Assert.AreEqual("ayende", actual.ParentName);
+					Assert.AreEqual("rahien", actual.ChildName);
 				}
 			}
 		}
