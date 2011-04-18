@@ -6,7 +6,7 @@ namespace System.Threading
 	{
 		private readonly Func<T> valueCreator;
 
-		private class Holder
+		public class Holder
  		{
  			public T Val;
  		}
@@ -16,7 +16,6 @@ namespace System.Threading
 
 		public ThreadLocal():this(() => default(T))
 		{
-			
 		}
 
 		public ThreadLocal(Func<T> valueCreator)
@@ -41,7 +40,8 @@ namespace System.Threading
 			{
 				if (_state == null)
 					_state = new ConditionalWeakTable<object, Holder>();
-				_state.Add(this, new Holder{Val = value});
+				var holder = _state.GetOrCreateValue(this);
+				holder.Val = value;
 			}
 		}
 	}

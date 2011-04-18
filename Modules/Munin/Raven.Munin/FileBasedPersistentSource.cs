@@ -18,14 +18,19 @@ namespace Raven.Munin
         public FileBasedPersistentSource(string basePath, string prefix)
         {
             this.basePath = basePath;
+        	EnsurePathExists(this.basePath);
             logPath = Path.Combine(basePath, prefix + ".ravendb");
 
             RecoverFromFailedRename(logPath);
 
             CreatedNew = FileExists(logPath) == false;
 
-            log = OpenFiles(logPath);
+            log = OpenFile(logPath);
         }
+
+    	protected virtual void EnsurePathExists(string path)
+    	{
+    	}
 
     	protected virtual bool FileExists(string path)
     	{
@@ -37,7 +42,7 @@ namespace Raven.Munin
             get { return log; }
         }
 
-        protected virtual FileStream OpenFiles(string path)
+        protected virtual FileStream OpenFile(string path)
         {
             return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096);
         }
@@ -66,13 +71,13 @@ namespace Raven.Munin
 
             FileDelete(renamedLogFile);
 
-            log = OpenFiles(logPath);
+            log = OpenFile(logPath);
         }
 
         public override Stream CreateTemporaryStream()
         {
             string tempFile = Path.Combine(basePath, Path.GetFileName(Path.GetTempFileName()));
-            return OpenFiles(tempFile);
+            return OpenFile(tempFile);
         }
 
         public override void FlushLog()
