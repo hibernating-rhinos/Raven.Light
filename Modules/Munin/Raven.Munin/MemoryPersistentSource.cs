@@ -50,14 +50,6 @@ namespace Raven.Munin
         {
         }
 
-        public override RemoteManagedStorageState CreateRemoteAppDomainState()
-        {
-            return new RemoteManagedStorageState
-            {
-                Log = ((MemoryStream)Log).ToArray(),
-            };
-        }
-
     	public override void EnsureCapacity(int value)
     	{
     		log.Capacity = value;

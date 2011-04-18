@@ -83,7 +83,7 @@ namespace Raven.Munin
             return new DisposableAction(delegate
             {
                 ConcurrentQueue<Stream> current2;
-                if (currentversion == version && 
+                if (currentversion == Interlocked.CompareExchange(ref version, 0, 0) && 
                     openedStreamsPool.TryGetValue(currentversion, out current2))
                 {
                     current2.Enqueue(value);

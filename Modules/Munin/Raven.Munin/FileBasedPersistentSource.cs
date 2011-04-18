@@ -13,15 +13,13 @@ namespace Raven.Munin
         private readonly string basePath;
         private readonly string logPath;
         private readonly string prefix;
-        private readonly bool writeThrough;
 
         private FileStream log;
 
-        public FileBasedPersistentSource(string basePath, string prefix, bool writeThrough)
+        public FileBasedPersistentSource(string basePath, string prefix)
         {
             this.basePath = basePath;
             this.prefix = prefix;
-            this.writeThrough = writeThrough;
             logPath = Path.Combine(basePath, prefix + ".ravendb");
 
             RecoverFromFailedRename(logPath);
@@ -38,11 +36,7 @@ namespace Raven.Munin
 
         private void OpenFiles()
         {
-            log = new FileStream(logPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096,
-                                 writeThrough
-                                     ? FileOptions.WriteThrough | FileOptions.SequentialScan
-                                     : FileOptions.SequentialScan
-                );
+            log = new FileStream(logPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read, 4096);
         }
 
         protected override Stream CreateClonedStreamForReadOnlyPurposes()
@@ -80,16 +74,7 @@ namespace Raven.Munin
 
         public override void FlushLog()
         {
-            log.Flush(writeThrough);
-        }
-
-        public override RemoteManagedStorageState CreateRemoteAppDomainState()
-        {
-            return new RemoteManagedStorageState
-            {
-                Path = basePath,
-                Prefix = prefix
-            };
+        	log.Flush(true);
         }
 
         private static void RecoverFromFailedRename(string file)

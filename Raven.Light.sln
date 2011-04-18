@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raven.Munin.Silverlight", "Modules\Munin\Raven.Munin\Raven.Munin.Silverlight.csproj", "{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raven.Json", "Modules\Json\Raven.Json.csproj", "{5F759B1E-A2B2-4EB0-8A4C-70E608F17415}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F759B1E-A2B2-4EB0-8A4C-70E608F17415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F759B1E-A2B2-4EB0-8A4C-70E608F17415}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F759B1E-A2B2-4EB0-8A4C-70E608F17415}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F759B1E-A2B2-4EB0-8A4C-70E608F17415}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

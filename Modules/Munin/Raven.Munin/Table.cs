@@ -262,7 +262,7 @@ namespace Raven.Munin
             if(data.Length != size)
                 throw new InvalidDataException("Could not read complete data, the file is probably corrupt when reading: " + key.ToString(Formatting.None) + " on table " + Name);
 
-            using(var sha256 = SHA256.Create())
+            using(var sha256 = new SHA256Managed())
             {
                 var hash = sha256.ComputeHash(data);
                 var hashFromFile = binaryReader.ReadBytes(hash.Length);

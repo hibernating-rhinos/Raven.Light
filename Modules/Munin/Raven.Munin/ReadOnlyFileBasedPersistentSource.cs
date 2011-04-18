@@ -39,7 +39,7 @@ namespace Raven.Munin
 
         protected override Stream CreateClonedStreamForReadOnlyPurposes()
         {
-            return new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, FileOptions.SequentialScan);
+            return new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096);
         }
 
         protected override Stream Log
@@ -60,15 +60,6 @@ namespace Raven.Munin
         public override void FlushLog()
         {
             throw new NotSupportedException();
-        }
-
-        public override RemoteManagedStorageState CreateRemoteAppDomainState()
-        {
-            return new RemoteManagedStorageState
-            {
-                Path = basePath,
-                Prefix = prefix
-            };
         }
 
         #endregion

@@ -25,7 +25,6 @@ namespace Raven.Munin
         Stream CreateTemporaryStream();
 
         void FlushLog();
-        RemoteManagedStorageState CreateRemoteAppDomainState();
         void ClearPool();
     	void EnsureCapacity(int value);
     }

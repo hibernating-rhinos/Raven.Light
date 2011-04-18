@@ -2,13 +2,25 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Raven.Json.Linq;
+using Raven.Munin;
 
 namespace System.Collections.Concurrent
 // ReSharper restore CheckNamespace
 {
 	public class ConcurrentDictionary<TKey, TValue> 
 	{
-		private readonly Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
+		private readonly Dictionary<TKey, TValue> dictionary;
+
+		public ConcurrentDictionary(IComparerAndEquality<RavenJToken> comparer)
+		{
+			dictionary = new Dictionary<TKey, TValue>((IEqualityComparer<TKey>)comparer);
+		}
+
+		public ConcurrentDictionary()
+		{
+			dictionary = new Dictionary<TKey, TValue>();
+		}
 
 		public bool TryAdd(TKey key, TValue value)
 		{
@@ -63,40 +75,16 @@ namespace System.Collections.Concurrent
 				return dictionary.TryGetValue(key, out value);
 			}
 		}
-	}
 
-	public class ConcurrentQueue<T>
-	{
-		private readonly Queue<T> queue = new Queue<T>();
-
-		public int Count
+		public TValue GetOrAdd(TKey key, TValue value)
 		{
-			get
+			lock (dictionary)
 			{
-				lock (queue)
-				{
-					return queue.Count;
-				}
-			}
-		}
-
-		public bool TryDequeue(out T result)
-		{
-			lock (queue)
-			{
-				result = default(T);
-				if (queue.Count == 0)
-					return false;
-				result = queue.Dequeue();
-				return true;
-			}
-		}
-
-		public void Enqueue(T value)
-		{
-			lock (queue)
-			{
-				queue.Enqueue(value);	
+				TValue existing;
+				if (dictionary.TryGetValue(key, out existing))
+					return existing;
+				dictionary.Add(key, value);
+				return value;
 			}
 		}
 	}

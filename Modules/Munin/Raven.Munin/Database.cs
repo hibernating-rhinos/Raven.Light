@@ -264,7 +264,7 @@ namespace Raven.Munin
 						command.Position = log.Position;
 						command.Size = command.Payload.Length;
 						log.Write(command.Payload, 0, command.Payload.Length);
-						using (var sha256 = SHA256.Create())
+						using (var sha256 = new SHA256Managed())
 						{
 							var sha = sha256.ComputeHash(command.Payload);
 							log.Write(sha, 0, sha.Length);

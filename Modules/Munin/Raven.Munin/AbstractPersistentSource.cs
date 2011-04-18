@@ -132,7 +132,6 @@ namespace Raven.Munin
         public abstract void ReplaceAtomically(Stream newLog);
         public abstract Stream CreateTemporaryStream();
         public abstract void FlushLog();
-        public abstract RemoteManagedStorageState CreateRemoteAppDomainState();
 
         public void ClearPool()
         {
