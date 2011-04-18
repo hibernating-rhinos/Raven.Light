@@ -26,7 +26,10 @@ namespace Raven.Light.Impl
 		{
 			try
 			{
-				Conventions = new DocumentConvention();
+				Conventions = new DocumentConvention
+				{
+					DocumentKeyGenerator = o => Guid.NewGuid().ToString()
+				};
 
 				persistentSource = new IsolatedStoragePersistentSource(name, "ravenlight");
 				storage = new TableStorage(persistentSource);

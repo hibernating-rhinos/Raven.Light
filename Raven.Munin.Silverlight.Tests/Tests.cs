@@ -1,15 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
-using Microsoft.Silverlight.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Raven.Light.Impl;
 
 namespace SilverlightTest1
@@ -43,5 +32,26 @@ namespace SilverlightTest1
 				}
 			}
 		}
+
+		[TestMethod]
+		public void CanStoreAnEntity()
+		{
+			using (var store = new EmbeddedDocumentStore())
+			{
+				using (var session = store.OpenSession())
+				{
+					session.Store(new User
+					{
+						Name = "ayende"
+					});
+					session.SaveChanges();
+				}
+			}
+		}
+	}
+
+	public class User
+	{
+		public string Name { get; set; }
 	}
 }

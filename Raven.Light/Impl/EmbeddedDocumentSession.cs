@@ -57,13 +57,16 @@ namespace Raven.Light.Impl
 
 		public void SaveChanges()
 		{
-			var prepareForSaveChanges = PrepareForSaveChanges();
-			var batchResults = new List<BatchResult>();
-			documentStore.Storage.Batch(
-				actions => batchResults.AddRange(
-					prepareForSaveChanges.Commands.Select(command => command.Execute(actions)))
-					);
-			UpdateBatchResults(batchResults, prepareForSaveChanges.Entities);
+			using(EntitiesToJsonCachingScope())
+			{
+				var prepareForSaveChanges = PrepareForSaveChanges();
+				var batchResults = new List<BatchResult>();
+				documentStore.Storage.Batch(
+					actions => batchResults.AddRange(
+						prepareForSaveChanges.Commands.Select(command => command.Execute(actions)))
+						);
+				UpdateBatchResults(batchResults, prepareForSaveChanges.Entities);
+			}
 		}
 	}
 }
