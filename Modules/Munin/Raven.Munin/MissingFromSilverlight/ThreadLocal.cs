@@ -28,7 +28,7 @@ namespace System.Threading
 			get
 			{
 				Holder value;
-				if (_state == null || _state.TryGetValue(this, out value))
+				if (_state == null || _state.TryGetValue(this, out value) == false)
 				{
 					var val = valueCreator();
 					Value = val;

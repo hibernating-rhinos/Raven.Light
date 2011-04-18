@@ -27,8 +27,20 @@ namespace SilverlightTest1
 		[TestMethod]
 		public void CanStartTheStore()
 		{
-			using(var store = new EmbeddedDocumentStore())
+			using (new EmbeddedDocumentStore())
 			{
+			}
+		}
+
+		[TestMethod]
+		public void CanOpenASession()
+		{
+			using (var store = new EmbeddedDocumentStore())
+			{
+				using(var session = store.OpenSession())
+				{
+					
+				}
 			}
 		}
 	}
