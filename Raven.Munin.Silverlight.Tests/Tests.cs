@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.IO.IsolatedStorage;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Raven.Light.Impl;
 
 namespace SilverlightTest1
@@ -6,6 +7,12 @@ namespace SilverlightTest1
 	[TestClass]
 	public class TheVeryBasics
 	{
+		[TestCleanup]
+		public void ClearIsolatedStorage()
+		{
+			IsolatedStorageFile.GetUserStoreForApplication().Remove();
+		}
+
 		[TestMethod]
 		public void TheTestFrameworkWorks()
 		{
@@ -19,6 +26,7 @@ namespace SilverlightTest1
 			using (new EmbeddedDocumentStore())
 			{
 			}
+			
 		}
 
 		[TestMethod]
@@ -45,6 +53,36 @@ namespace SilverlightTest1
 						Name = "ayende"
 					});
 					session.SaveChanges();
+				}
+			}
+		}
+
+		[TestMethod]
+		public void CanQuery()
+		{
+			using (var store = new EmbeddedDocumentStore())
+			{
+				using (var session = store.OpenSession())
+				{
+					session.Store(new User
+					{
+						Name = "ayende"
+					});
+					session.Store(new User
+					{
+						Name = "rahien"
+					});
+					session.SaveChanges();
+				}
+
+				using (var session = store.OpenSession())
+				{
+					var users = from user in session.Query<User>()
+					            where user.Name == "ayende"
+					            select user;
+
+					Assert.AreEqual(1, users.ToList().Count);
+					Assert.IsFalse(session.Advanced.IsLoaded("users/2"));
 				}
 			}
 		}

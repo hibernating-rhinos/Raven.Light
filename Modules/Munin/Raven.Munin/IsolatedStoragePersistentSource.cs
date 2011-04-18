@@ -44,5 +44,12 @@ namespace Raven.Munin
 			if(IsolatedStorage.DirectoryExists(path) == false)
 				IsolatedStorage.CreateDirectory(path);
 		}
+
+		public override void Dispose()
+		{
+			if(isolatedStorage!=null)
+				isolatedStorage.Dispose();
+			base.Dispose();
+		}
 	}
 }
