@@ -81,8 +81,6 @@
     <Compile Include="IEmbeddedSession.cs" />
     <Compile Include="IEmbeddedSessionAdvanced.cs" />
     <Compile Include="Impl\AbstractEmbeddedDocumentSession.cs" />
-    <Compile Include="Impl\HiLoKeyGenerator.cs" />
-    <Compile Include="Impl\MultiTypeHiLoKeyGenerator.cs" />
     <Compile Include="Impl\RavenLightQueryable.cs" />
     <Compile Include="Json\Default.cs" />
     <Compile Include="Json\DynamicJsonObject.cs" />

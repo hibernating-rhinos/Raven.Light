@@ -60,18 +60,23 @@ namespace SilverlightTest1
 		[TestMethod]
 		public void CanQuery()
 		{
+			string ayendeId, rahineId;
 			using (var store = new EmbeddedDocumentStore())
 			{
 				using (var session = store.OpenSession())
 				{
-					session.Store(new User
+					var ayende = new User
 					{
 						Name = "ayende"
-					});
-					session.Store(new User
+					};
+					session.Store(ayende);
+					ayendeId = session.Advanced.GetDocumentId(ayende);
+					var rahien = new User
 					{
 						Name = "rahien"
-					});
+					};
+					session.Store(rahien);
+					rahineId = session.Advanced.GetDocumentId(rahien);
 					session.SaveChanges();
 				}
 
@@ -82,7 +87,8 @@ namespace SilverlightTest1
 					            select user;
 
 					Assert.AreEqual(1, users.ToList().Count);
-					Assert.IsFalse(session.Advanced.IsLoaded("users/2"));
+					Assert.IsFalse(session.Advanced.IsLoaded(rahineId));
+					Assert.IsTrue(session.Advanced.IsLoaded(ayendeId));
 				}
 			}
 		}
@@ -90,6 +96,7 @@ namespace SilverlightTest1
 		[TestMethod]
 		public void CanStoreAnEntityAndThenLoadIt()
 		{
+			string documentId;
 			using (var store = new EmbeddedDocumentStore())
 			{
 				using (var session = store.OpenSession())
@@ -99,13 +106,13 @@ namespace SilverlightTest1
 						Name = "ayende"
 					};
 					session.Store(instance);
-					var documentId = session.Advanced.GetDocumentId(instance);
+					documentId = session.Advanced.GetDocumentId(instance);
 					session.SaveChanges();
 				}
 
 				using (var session = store.OpenSession())
 				{
-					var user = session.Load<User>("users/1");
+					var user = session.Load<User>(documentId);
 					Assert.AreEqual("ayende", user.Name);
 				}
 			}

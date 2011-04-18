@@ -28,7 +28,13 @@ namespace Raven.Light.Impl
 			{
 				Conventions = new DocumentConvention
 				{
-					DocumentKeyGenerator = o => new MultiTypeHiLoKeyGenerator(this, 16).GenerateDocumentKey(Conventions, o)
+					DocumentKeyGenerator = entity =>
+					{
+						var typeTagName = Conventions.GetTypeTagName(entity.GetType());
+						if (typeTagName == null)
+							return Guid.NewGuid().ToString();
+						return typeTagName + "/" + Guid.NewGuid();
+					}
 				};
 
 				persistentSource = new IsolatedStoragePersistentSource(name, "ravenlight");

@@ -63,7 +63,7 @@ namespace Raven.Light.Persistence
 		public IEnumerable<JsonDocument> ScanByTag(string tag)
 		{
 			return Storage.Documents["ByTag"]
-				.SkipTo(tag)
+				.SkipTo(new RavenJObject { { "tag", tag } })
 				.TakeWhile(x => string.Equals(x.Value<string>("tag"), tag, StringComparison.InvariantCultureIgnoreCase))
 				.Select(token => Read(token.Value<string>("key")))
 				.Where(read => read != null);
