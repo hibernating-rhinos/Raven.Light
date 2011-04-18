@@ -114,7 +114,7 @@ namespace Raven.Light.Impl
 
 		#region Nested type: HiLoKey
 
-		private class HiLoKey
+		public class HiLoKey
 		{
 			public long ServerHi { get; set; }
 

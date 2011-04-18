@@ -48,10 +48,29 @@ namespace SilverlightTest1
 				}
 			}
 		}
-	}
 
-	public class User
-	{
-		public string Name { get; set; }
+		[TestMethod]
+		public void CanStoreAnEntityAndThenLoadIt()
+		{
+			using (var store = new EmbeddedDocumentStore())
+			{
+				using (var session = store.OpenSession())
+				{
+					var instance = new User
+					{
+						Name = "ayende"
+					};
+					session.Store(instance);
+					var documentId = session.Advanced.GetDocumentId(instance);
+					session.SaveChanges();
+				}
+
+				using (var session = store.OpenSession())
+				{
+					var user = session.Load<User>("users/1");
+					Assert.AreEqual("ayende", user.Name);
+				}
+			}
+		}
 	}
 }
