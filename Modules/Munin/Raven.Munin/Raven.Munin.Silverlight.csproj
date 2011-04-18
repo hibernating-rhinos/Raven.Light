@@ -56,6 +56,7 @@
     <Reference Include="Newtonsoft.Json.Silverlight">
       <HintPath>..\..\..\packages\Newtonsoft.Json.4.0.1\lib\SL\Newtonsoft.Json.Silverlight.dll</HintPath>
     </Reference>
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows" />
     <Reference Include="system" />
     <Reference Include="System.Core" />
@@ -95,6 +96,7 @@
     <Compile Include="Tree\IBinarySearchTree.cs" />
     <Compile Include="Tree\IStack.cs" />
     <Compile Include="Tree\Stack.cs" />
+    <Compile Include="Util\PooledMemoryStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Raven.Munin.snk" />

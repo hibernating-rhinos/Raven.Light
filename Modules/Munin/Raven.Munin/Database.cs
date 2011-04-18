@@ -18,7 +18,7 @@ namespace Raven.Munin
 {
 	public class Database : IEnumerable<Table>, IDisposable
 	{
-		private readonly IPersistentSource persistentSource;
+		protected readonly IPersistentSource persistentSource;
 		private readonly List<Table> tables = new List<Table>();
 
 		public List<Table> Tables
@@ -223,6 +223,11 @@ namespace Raven.Munin
 					table.CompleteCommit(txId);
 				}
 
+				foreach (var command in cmds)
+				{
+					if(command.Payload!=null)
+						command.Payload.Dispose();
+				}
 			});
 		}
 
@@ -262,13 +267,10 @@ namespace Raven.Munin
 					if (command.Payload != null)
 					{
 						command.Position = log.Position;
-						command.Size = command.Payload.Length;
-						log.Write(command.Payload, 0, command.Payload.Length);
-						using (var sha256 = new SHA256Managed())
-						{
-							var sha = sha256.ComputeHash(command.Payload);
-							log.Write(sha, 0, sha.Length);
-						}
+						command.Size = (int) command.Payload.Length;
+						command.Payload.CopyTo(log);
+						var sha = command.Payload.ComputeHash();
+						log.Write(sha, 0, sha.Length);
 					}
 					cmd.Add("position", command.Position);
 					cmd.Add("size", command.Size);

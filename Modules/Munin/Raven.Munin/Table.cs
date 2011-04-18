@@ -15,6 +15,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using Raven.Json.Linq;
 using Raven.Munin.Tree;
+using Raven.Munin.Util;
 
 namespace Raven.Munin
 {
@@ -135,12 +136,12 @@ namespace Raven.Munin
             return Remove(key, txId.Value);
         }
 
-        public bool Put(RavenJToken key, byte[] value)
+		public bool Put(RavenJToken key, PooledMemoryStream value)
         {
             return Put(key, value, txId.Value);
         }
 
-        public bool Put(RavenJToken key, byte[] value, Guid transactionId)
+		public bool Put(RavenJToken key, PooledMemoryStream value, Guid transactionId)
         {
             Guid existing;
             if (keysModifiedInTx.TryGetValue(key, out existing) && existing != transactionId)
@@ -191,7 +192,7 @@ namespace Raven.Munin
 
 		internal ReadResult Read(RavenJToken key, Guid txId)
         {
-            byte[] readData = null;
+            Stream readData = null;
 
             Guid mofiedByTx;
             if (keysModifiedInTx.TryGetValue(key, out mofiedByTx) && mofiedByTx == txId)
@@ -235,7 +236,7 @@ namespace Raven.Munin
             });
         }
 
-        private byte[] ReadData(Command command)
+        private Stream ReadData(Command command)
         {
             if (command.Payload != null)
                 return command.Payload;
@@ -243,42 +244,38 @@ namespace Raven.Munin
             return ReadData(command.Position, command.Size, command.Key);
         }
 
-		private byte[] ReadData(long pos, int size, RavenJToken key)
+		private PooledMemoryStream ReadData(long pos, int size, RavenJToken key)
         {
             if (pos == -1)
                 return null;
 
-            return persistentSource.Read(log =>
-            {
-            	return ReadDataNoCaching(log, pos, size, key);
-            });
+            return persistentSource.Read(log => ReadDataNoCaching(log, pos, size, key));
         }
 
-		private byte[] ReadDataNoCaching(Stream log, long pos, int size, RavenJToken key)
-        {
-            log.Position = pos;
-            var binaryReader = new BinaryReader(log);
-            var data = binaryReader.ReadBytes(size);
-            if(data.Length != size)
-                throw new InvalidDataException("Could not read complete data, the file is probably corrupt when reading: " + key.ToString(Formatting.None) + " on table " + Name);
+		private PooledMemoryStream ReadDataNoCaching(Stream log, long pos, int size, RavenJToken key)
+		{
+			log.Position = pos;
+			var data = PooledMemoryStream.From(log, size);
+			if (data.Length != size)
+				throw new InvalidDataException("Could not read complete data, the file is probably corrupt when reading: " +
+				                               key.ToString(Formatting.None) + " on table " + Name);
+			var hash = data.ComputeHash();
+			var binaryReader = new BinaryReader(log);
+			var hashFromFile = binaryReader.ReadBytes(hash.Length);
+			if (hashFromFile.Length != hash.Length)
+				throw new InvalidDataException("Could not read complete SHA data, the file is probably corrupt when reading: " +
+				                               key.ToString(Formatting.None) + " on table " + Name);
 
-            using(var sha256 = new SHA256Managed())
-            {
-                var hash = sha256.ComputeHash(data);
-                var hashFromFile = binaryReader.ReadBytes(hash.Length);
-                if(hashFromFile.Length != hash.Length)
-					throw new InvalidDataException("Could not read complete SHA data, the file is probably corrupt when reading: " + key.ToString(Formatting.None) + " on table " + Name);
+			if (hashFromFile.Where((t, i) => hash[i] != t).Any())
+			{
+				throw new InvalidDataException("Invalid SHA signature, the file is probably corrupt when reading: " +
+				                               key.ToString(Formatting.None) + " on table " + Name);
+			}
 
-                if (hashFromFile.Where((t, i) => hash[i] != t).Any())
-                {
-					throw new InvalidDataException("Invalid SHA signature, the file is probably corrupt when reading: " + key.ToString(Formatting.None) + " on table " + Name);
-                }
-            }
+			return data;
+		}
 
-            return data;
-        }
-
-        internal List<Command> GetCommandsToCommit(Guid transactionId)
+    	internal List<Command> GetCommandsToCommit(Guid transactionId)
         {
             List<Command> cmds;
             if (operationsInTransactions.TryGetValue(transactionId, out cmds) == false)
@@ -380,14 +377,14 @@ namespace Raven.Munin
             public int Size { get; set; }
             public long Position { get; set; }
 			public RavenJToken Key { get; set; }
-            public Func<byte[]> Data { get; set; }
+            public Func<Stream> Data { get; set; }
         }
 
         public IEnumerator<ReadResult> GetEnumerator()
         {
             foreach (var positionInFile in KeyToFilePos.ValuesInOrder)
             {
-                byte[] readData = null;
+                Stream readData = null;
                 var pos = positionInFile;
                 yield return new ReadResult
                 {

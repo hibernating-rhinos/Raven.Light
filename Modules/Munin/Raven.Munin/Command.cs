@@ -3,14 +3,16 @@
 //     Copyright (c) Hibernating Rhinos LTD. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
+using System.IO;
 using Newtonsoft.Json;
 using Raven.Json.Linq;
+using Raven.Munin.Util;
 
 namespace Raven.Munin
 {
     public class Command
     {
-        public byte[] Payload { get; set; }
+        public PooledMemoryStream Payload { get; set; }
         public int Size { get; set; }
 		public RavenJToken Key { get; set; }
         public CommandType Type { get; set; }
