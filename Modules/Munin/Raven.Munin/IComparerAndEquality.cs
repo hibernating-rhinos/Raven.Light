@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Raven.Munin
 {
-    public interface IComparerAndEquality<in TKey> : IComparer<TKey>, IEqualityComparer<TKey>
+    public interface IComparerAndEquality<TKey> : IComparer<TKey>, IEqualityComparer<TKey>
     {
         
     }

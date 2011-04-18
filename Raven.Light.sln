@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raven.Munin.Silverlight", "Modules\Munin\Raven.Munin\Raven.Munin.Silverlight.csproj", "{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECDA5ACB-C276-4F89-A6CE-F62AC01632DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

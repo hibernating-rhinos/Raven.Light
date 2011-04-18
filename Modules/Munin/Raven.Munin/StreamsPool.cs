@@ -36,12 +36,12 @@ namespace Raven.Munin
             Stream result;
             var currentVersion = Interlocked.Increment(ref version);
             openedStreamsPool.TryAdd(currentVersion, new ConcurrentQueue<Stream>());
-            var keysToRemove = openedStreamsPool.Keys.Where(x => x < currentVersion).ToArray();
+            var keysToRemove = openedStreamsPool.Where(x => x.Key < currentVersion);
 
             foreach (var keyToRemove in keysToRemove)
             {
                 ConcurrentQueue<Stream> value;
-                if (openedStreamsPool.TryRemove(keyToRemove, out value) == false)
+                if (openedStreamsPool.TryRemove(keyToRemove.Key, out value) == false)
                     continue;
 
                 while (value.TryDequeue(out result))
@@ -56,7 +56,7 @@ namespace Raven.Munin
             Stream result;
             var currentVersion = Interlocked.Increment(ref version);
             openedStreamsPool.TryAdd(currentVersion, new ConcurrentQueue<Stream>());
-            var keysToRemove = openedStreamsPool.Keys.ToArray();
+            var keysToRemove = openedStreamsPool.KeysAsArray();
 
             foreach (var keyToRemove in keysToRemove)
             {
@@ -73,7 +73,7 @@ namespace Raven.Munin
 
         public IDisposable Use(out Stream stream)
         {
-            var currentversion = Thread.VolatileRead(ref version);
+        	var currentversion = Interlocked.CompareExchange(ref version, 0, 0);
             ConcurrentQueue<Stream> current;
             openedStreamsPool.TryGetValue(currentversion, out current);
             Stream value = current != null && current.TryDequeue(out value) ? 
@@ -83,7 +83,7 @@ namespace Raven.Munin
             return new DisposableAction(delegate
             {
                 ConcurrentQueue<Stream> current2;
-                if (currentversion == Thread.VolatileRead(ref currentversion) && 
+                if (currentversion == version && 
                     openedStreamsPool.TryGetValue(currentversion, out current2))
                 {
                     current2.Enqueue(value);
