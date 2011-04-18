@@ -22,9 +22,9 @@ namespace Raven.Munin.Util
 			{
 				int read;
 				destination = new PooledMemoryStream();
-				while ((read = stream.Read(buffer, 0, buffer.Length)) != 0 &&
-					(total += read) < length)
+				while ((read = stream.Read(buffer, 0, Math.Min(buffer.Length, length - total))) != 0)
 				{
+					total += read;
 					destination.Write(buffer, 0, read);
 				}
 				return destination;
