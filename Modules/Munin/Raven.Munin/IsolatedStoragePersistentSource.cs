@@ -14,6 +14,11 @@ namespace Raven.Munin
 		{
 		}
 
+		protected override Stream CreateClonedStreamForReadOnlyPurposes()
+		{
+			return IsolatedStorage.OpenFile(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+		}
+
 		protected override bool FileExists(string path)
 		{
 			return IsolatedStorage.FileExists(path);

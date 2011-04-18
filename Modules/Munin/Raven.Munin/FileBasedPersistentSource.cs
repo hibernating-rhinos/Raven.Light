@@ -11,7 +11,7 @@ namespace Raven.Munin
     public class FileBasedPersistentSource : AbstractPersistentSource
     {
         private readonly string basePath;
-        private readonly string logPath;
+    	protected readonly string logPath;
 
         private FileStream log;
 
