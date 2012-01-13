@@ -39,6 +39,7 @@ namespace Raven.Light.Impl
 
 				persistentSource = new IsolatedStoragePersistentSource(name, "ravenlight");
 				storage = new TableStorage(persistentSource);
+				storage.Initialze();
 			}
 			catch
 			{

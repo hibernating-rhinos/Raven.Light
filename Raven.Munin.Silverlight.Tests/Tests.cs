@@ -59,6 +59,45 @@ namespace SilverlightTest1
 		}
 
 		[TestMethod]
+		public void CanQueryWithStoreRestart()
+		{
+			string ayendeId, rahineId;
+			using (var store = new EmbeddedDocumentStore())
+			{
+				using (var session = store.OpenSession())
+				{
+					var ayende = new User
+					{
+						Name = "ayende"
+					};
+					session.Store(ayende);
+					ayendeId = session.Advanced.GetDocumentId(ayende);
+					var rahien = new User
+					{
+						Name = "rahien"
+					};
+					session.Store(rahien);
+					rahineId = session.Advanced.GetDocumentId(rahien);
+					session.SaveChanges();
+				}
+			}
+
+			using (var store = new EmbeddedDocumentStore())
+			{
+				using (var session = store.OpenSession())
+				{
+					var users = from user in session.Query<User>()
+								where user.Name == "ayende"
+								select user;
+
+					Assert.AreEqual(1, users.ToList().Count);
+					Assert.IsFalse(session.Advanced.IsLoaded(rahineId));
+					Assert.IsTrue(session.Advanced.IsLoaded(ayendeId));
+				}
+			}
+		}
+
+		[TestMethod]
 		public void CanQuery()
 		{
 			string ayendeId, rahineId;
